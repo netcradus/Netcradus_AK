@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../App';
-import { courseData } from '../data/coursesData';
+import { courseData as fallbackCourseData } from '../data/coursesData';
+import { academyService } from '../services/academyService';
 
 export default function Modals() {
   const {
@@ -11,11 +12,155 @@ export default function Modals() {
     enrollCourseName,
     setEnrollCourseName,
     selectedCourseKey,
-    handleFormSubmit,
-    showToast
+    showToast,
+    courses,
   } = useApp();
 
-  const selectedCourse = courseData[selectedCourseKey];
+  // Dynamic Course Lookup (from API courses or fallback dictionary)
+  const apiCourse = courses.find((c) => c.slug === selectedCourseKey);
+  const fallbackCourse = fallbackCourseData[selectedCourseKey];
+
+  const selectedCourse = apiCourse
+    ? {
+        title: apiCourse.title,
+        category: apiCourse.category,
+        image: apiCourse.thumbnail || '/images/cyber.png',
+        duration: apiCourse.duration || '6 Months',
+        level: apiCourse.level || 'Beginner to Advanced',
+        prereq: apiCourse.prereq || (apiCourse.requirements && apiCourse.requirements[0]) || 'Basic tech concepts',
+        cert: apiCourse.cert || 'Netcradus Industry Certification',
+        tools: apiCourse.tools && apiCourse.tools.length > 0 ? apiCourse.tools : ['Metasploit', 'Wireshark', 'Python'],
+        curriculum: apiCourse.learningOutcomes && apiCourse.learningOutcomes.length > 0 ? apiCourse.learningOutcomes : ['Module 1: Foundations'],
+      }
+    : fallbackCourse;
+
+  // Enrollment Form State
+  const [enrollForm, setEnrollForm] = useState({ fullName: '', email: '', phone: '' });
+  const [enrollSubmitting, setEnrollSubmitting] = useState(false);
+  const [enrollError, setEnrollError] = useState('');
+
+  // Quick Enquiry Form State
+  const [enquireForm, setEnquireForm] = useState({ fullName: '', email: '', phone: '', interestedCourse: '' });
+  const [enquireSubmitting, setEnquireSubmitting] = useState(false);
+  const [enquireError, setEnquireError] = useState('');
+
+  // Callback Modal State
+  const [callForm, setCallForm] = useState({ fullName: '', email: '', phone: '' });
+  const [callSubmitting, setCallSubmitting] = useState(false);
+  const [callError, setCallError] = useState('');
+
+  // Demo Modal State
+  const [demoForm, setDemoForm] = useState({ fullName: '', email: '', phone: '' });
+  const [demoSubmitting, setDemoSubmitting] = useState(false);
+  const [demoError, setDemoError] = useState('');
+
+  // 1. ENROLLMENT SUBMISSION
+  const handleEnrollSubmit = async (e) => {
+    e.preventDefault();
+    setEnrollSubmitting(true);
+    setEnrollError('');
+
+    try {
+      const payload = {
+        fullName: enrollForm.fullName,
+        email: enrollForm.email,
+        phone: enrollForm.phone,
+        courseName: enrollCourseName,
+        courseSlug: selectedCourseKey,
+      };
+
+      const result = await academyService.submitEnrollment(payload);
+      showToast(result.message || `Enrollment submitted successfully for ${enrollCourseName}!`);
+      setEnrollForm({ fullName: '', email: '', phone: '' });
+      closeModal('enroll');
+    } catch (err) {
+      console.error('[Enrollment Submission Error]:', err);
+      setEnrollError(err.message || 'Unable to submit enrollment right now. Please try again.');
+    } finally {
+      setEnrollSubmitting(false);
+    }
+  };
+
+  // 2. QUICK ENQUIRY SUBMISSION
+  const handleEnquireSubmit = async (e) => {
+    e.preventDefault();
+    setEnquireSubmitting(true);
+    setEnquireError('');
+
+    try {
+      const payload = {
+        fullName: enquireForm.fullName,
+        email: enquireForm.email,
+        phone: enquireForm.phone,
+        interestedCourse: enquireForm.interestedCourse || 'General Tech Program',
+        source: 'quick_enquiry',
+      };
+
+      const result = await academyService.submitInquiry(payload);
+      showToast(result.message || 'Thank you! Your inquiry has been received.');
+      setEnquireForm({ fullName: '', email: '', phone: '', interestedCourse: '' });
+      closeDrawer('enquire');
+    } catch (err) {
+      console.error('[Quick Enquiry Error]:', err);
+      setEnquireError(err.message || 'Unable to submit inquiry right now. Please try again.');
+    } finally {
+      setEnquireSubmitting(false);
+    }
+  };
+
+  // 3. CALLBACK REQUEST SUBMISSION
+  const handleCallSubmit = async (e) => {
+    e.preventDefault();
+    setCallSubmitting(true);
+    setCallError('');
+
+    try {
+      const payload = {
+        fullName: callForm.fullName,
+        email: callForm.email || `${callForm.fullName.replace(/\s+/g, '').toLowerCase()}@callback.netcradus.com`,
+        phone: callForm.phone,
+        interestedCourse: 'Callback Request',
+        source: 'callback_request',
+      };
+
+      const result = await academyService.submitInquiry(payload);
+      showToast(result.message || 'Callback request submitted! Our team will call you shortly.');
+      setCallForm({ fullName: '', email: '', phone: '' });
+      closeModal('call');
+    } catch (err) {
+      console.error('[Callback Request Error]:', err);
+      setCallError(err.message || 'Unable to request callback right now. Please try again.');
+    } finally {
+      setCallSubmitting(false);
+    }
+  };
+
+  // 4. DEMO WORKSHOP SUBMISSION
+  const handleDemoSubmit = async (e) => {
+    e.preventDefault();
+    setDemoSubmitting(true);
+    setDemoError('');
+
+    try {
+      const payload = {
+        fullName: demoForm.fullName,
+        email: demoForm.email || `${demoForm.fullName.replace(/\s+/g, '').toLowerCase()}@demo.netcradus.com`,
+        phone: demoForm.phone,
+        interestedCourse: 'Live Cybersecurity Workshop Demo',
+        source: 'workshop_registration',
+      };
+
+      const result = await academyService.submitInquiry(payload);
+      showToast(result.message || 'Workshop seat registered successfully!');
+      setDemoForm({ fullName: '', email: '', phone: '' });
+      closeModal('demo');
+    } catch (err) {
+      console.error('[Demo Workshop Error]:', err);
+      setDemoError(err.message || 'Unable to register for demo workshop right now. Please try again.');
+    } finally {
+      setDemoSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -28,7 +173,14 @@ export default function Modals() {
             <h3>Enroll in Netcradus Academia</h3>
             <p>Select your preferred course track and submit your application</p>
           </div>
-          <form onSubmit={(e) => handleFormSubmit(e, 'Enrollment Registration')}>
+
+          {enrollError && (
+            <div style={{ background: 'rgba(255, 50, 50, 0.1)', color: '#ff4757', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', marginBottom: '15px', border: '1px solid rgba(255,50,50,0.3)' }}>
+              <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i> {enrollError}
+            </div>
+          )}
+
+          <form onSubmit={handleEnrollSubmit}>
             <div className="form-group">
               <label htmlFor="enrollCourseName">Select Course / Program *</label>
               <select
@@ -40,42 +192,67 @@ export default function Modals() {
               >
                 <option value="" disabled>-- Select a Course or Track --</option>
                 <optgroup label="Cyber Security & Defense">
-                  <option value="Ethical Hacking & VAPT">Ethical Hacking & VAPT</option>
-                  <option value="SOC Analyst & Network Defense">SOC Analyst & Network Defense</option>
+                  <option value="Ethical Hacking & VAPT Professional Program">Ethical Hacking & VAPT</option>
+                  <option value="SOC Analyst & Incident Response Specialist">SOC Analyst & Network Defense</option>
                 </optgroup>
                 <optgroup label="Artificial Intelligence & Data">
-                  <option value="AI & Machine Learning With Generative AI">AI & Machine Learning With Generative AI</option>
-                  <option value="Data Analytics & Visualization">Data Analytics & Visualization</option>
+                  <option value="Artificial Intelligence & ML with Generative AI">AI & Machine Learning With Generative AI</option>
+                  <option value="Data Analytics & Visualization Masterclass">Data Analytics & Visualization</option>
                 </optgroup>
                 <optgroup label="Cloud & Software Development">
-                  <option value="AWS, Azure & Google Cloud Architecture">AWS, Azure & Google Cloud Architecture</option>
-                  <option value="MERN Stack Development">MERN Stack Development</option>
+                  <option value="AWS, Azure & Google Cloud Masterclass">AWS, Azure & Google Cloud Architecture</option>
+                  <option value="Full Stack MERN & Next.js Development">MERN Stack Development</option>
                 </optgroup>
                 <optgroup label="Corporate & Industry Projects">
                   <option value="Corporate Tech Upskilling Program">Corporate Tech Upskilling Program</option>
                   <option value="Netcradus Live Industry Projects">Netcradus Live Industry Projects</option>
-                  <option value="SOC Threat Intelligence Engine Project">SOC Threat Intelligence Engine Project</option>
-                  <option value="GenAI RAG Assistant Project">GenAI RAG Assistant Project</option>
-                  <option value="Multi-Cloud Kubernetes Project">Multi-Cloud Kubernetes Project</option>
-                  <option value="VAPT Web Audit Suite Project">VAPT Web Audit Suite Project</option>
-                  <option value="Full Stack MERN SaaS Project">Full Stack MERN SaaS Project</option>
-                  <option value="Financial Analytics Platform Project">Financial Analytics Platform Project</option>
                 </optgroup>
               </select>
             </div>
+
             <div className="form-group">
               <label>Full Name *</label>
-              <input type="text" className="form-input" placeholder="e.g. Rahul Sharma" required />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. Rahul Sharma"
+                value={enrollForm.fullName}
+                onChange={(e) => setEnrollForm({ ...enrollForm, fullName: e.target.value })}
+                required
+              />
             </div>
+
             <div className="form-group">
               <label>Email Address *</label>
-              <input type="email" className="form-input" placeholder="e.g. rahul@example.com" required />
+              <input
+                type="email"
+                className="form-input"
+                placeholder="e.g. rahul@example.com"
+                value={enrollForm.email}
+                onChange={(e) => setEnrollForm({ ...enrollForm, email: e.target.value })}
+                required
+              />
             </div>
+
             <div className="form-group">
               <label>Phone / Mobile *</label>
-              <input type="tel" className="form-input" placeholder="e.g. +91 98765 43210" required />
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="e.g. +91 98765 43210"
+                value={enrollForm.phone}
+                onChange={(e) => setEnrollForm({ ...enrollForm, phone: e.target.value })}
+                required
+              />
             </div>
-            <button type="submit" className="btn btn-cyan btn-block">CONFIRM ENROLLMENT</button>
+
+            <button type="submit" className="btn btn-cyan btn-block" disabled={enrollSubmitting}>
+              {enrollSubmitting ? (
+                <span><i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i> SUBMITTING...</span>
+              ) : (
+                'CONFIRM ENROLLMENT'
+              )}
+            </button>
           </form>
         </div>
       </div>
@@ -114,14 +291,14 @@ export default function Modals() {
 
               <h4 style={{ color: 'var(--text-main)', marginBottom: '10px' }}>Tools & Technologies Covered</h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
-                {selectedCourse.tools.map((t, idx) => (
+                {(selectedCourse.tools || []).map((t, idx) => (
                   <span key={idx} style={{ background: 'var(--bg-dark)', color: 'var(--cyan-primary)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '0.82rem', fontWeight: 600, border: '1px solid var(--border-subtle)' }}>{t}</span>
                 ))}
               </div>
 
               <h4 style={{ color: 'var(--text-main)', marginBottom: '10px' }}>Course Modules & Syllabus</h4>
               <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {selectedCourse.curriculum.map((m, idx) => (
+                {(selectedCourse.curriculum || []).map((m, idx) => (
                   <div key={idx} style={{ background: 'var(--bg-dark)', padding: '10px 15px', borderRadius: 'var(--radius-sm)', fontSize: '0.88rem', color: 'var(--text-main)', borderLeft: '3px solid var(--cyan-primary)' }}>
                     <i className="fa-solid fa-angle-right" style={{ color: 'var(--cyan-primary)', marginRight: '8px' }}></i> {m}
                   </div>
@@ -139,7 +316,7 @@ export default function Modals() {
                 >
                   ENROLL IN THIS COURSE
                 </button>
-                <button className="btn btn-outline btn-block" onClick={() => showToast(`Downloading official syllabus for ${selectedCourse.title}...`)}>
+                <button className="btn btn-outline btn-block" onClick={() => showToast(`Official syllabus download initiated for ${selectedCourse.title}.`)}>
                   <i className="fa-solid fa-file-pdf"></i> DOWNLOAD SYLLABUS
                 </button>
               </div>
@@ -157,20 +334,54 @@ export default function Modals() {
             <h3>Contact Academic Advisory</h3>
             <p>Speak directly with our expert career counselors</p>
           </div>
+
           <div className="direct-call-box">
-            <a href="tel:1800121008800" className="call-number-link"><i class="fa-solid fa-phone"></i> 1800 121 008800</a>
+            <a href="tel:1800121008800" className="call-number-link"><i className="fa-solid fa-phone"></i> 1800 121 008800</a>
             <div className="toll-free-tag">Toll-Free Support Line (Mon-Sat, 9am - 8pm)</div>
           </div>
-          <form onSubmit={(e) => handleFormSubmit(e, 'Callback Request')}>
+
+          {callError && (
+            <div style={{ background: 'rgba(255, 50, 50, 0.1)', color: '#ff4757', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', marginBottom: '15px', border: '1px solid rgba(255,50,50,0.3)' }}>
+              <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i> {callError}
+            </div>
+          )}
+
+          <form onSubmit={handleCallSubmit}>
             <div className="form-group">
               <label>Your Name *</label>
-              <input type="text" className="form-input" placeholder="e.g. Rahul Sharma" required />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. Rahul Sharma"
+                value={callForm.fullName}
+                onChange={(e) => setCallForm({ ...callForm, fullName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Email Address (Optional)</label>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="e.g. rahul@example.com"
+                value={callForm.email}
+                onChange={(e) => setCallForm({ ...callForm, email: e.target.value })}
+              />
             </div>
             <div className="form-group">
               <label>Mobile Number for Callback *</label>
-              <input type="tel" className="form-input" placeholder="e.g. +91 98765 43210" required />
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="e.g. +91 98765 43210"
+                value={callForm.phone}
+                onChange={(e) => setCallForm({ ...callForm, phone: e.target.value })}
+                required
+              />
             </div>
-            <button type="submit" className="btn btn-cyan btn-block">REQUEST IMMEDIATE CALLBACK</button>
+            <button type="submit" className="btn btn-cyan btn-block" disabled={callSubmitting}>
+              {callSubmitting ? 'SUBMITTING...' : 'REQUEST IMMEDIATE CALLBACK'}
+            </button>
           </form>
         </div>
       </div>
@@ -184,7 +395,11 @@ export default function Modals() {
             <h3>Login / Sign Up</h3>
             <p>Access your Netcradus Student Portal & Courses</p>
           </div>
-          <form onSubmit={(e) => handleFormSubmit(e, 'Login / Account Authentication')}>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            closeModal('login');
+            showToast('Student authentication portal login will be enabled in future phase.');
+          }}>
             <div className="form-group">
               <label>Email Address or Student ID *</label>
               <input type="text" className="form-input" placeholder="e.g. rahul@example.com or NC-2026-8842" required />
@@ -207,37 +422,72 @@ export default function Modals() {
             <h3>Quick Enquiry</h3>
             <p>Get instant course details, fee structure & batch timings</p>
           </div>
-          <form onSubmit={(e) => handleFormSubmit(e, 'Quick Enquiry')}>
+
+          {enquireError && (
+            <div style={{ background: 'rgba(255, 50, 50, 0.1)', color: '#ff4757', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', marginBottom: '15px', border: '1px solid rgba(255,50,50,0.3)' }}>
+              <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i> {enquireError}
+            </div>
+          )}
+
+          <form onSubmit={handleEnquireSubmit}>
             <div className="form-group">
               <label>Full Name *</label>
-              <input type="text" className="form-input" placeholder="e.g. Rahul Sharma" required />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. Rahul Sharma"
+                value={enquireForm.fullName}
+                onChange={(e) => setEnquireForm({ ...enquireForm, fullName: e.target.value })}
+                required
+              />
             </div>
             <div className="form-group">
               <label>Email Address *</label>
-              <input type="email" className="form-input" placeholder="e.g. rahul@example.com" required />
+              <input
+                type="email"
+                className="form-input"
+                placeholder="e.g. rahul@example.com"
+                value={enquireForm.email}
+                onChange={(e) => setEnquireForm({ ...enquireForm, email: e.target.value })}
+                required
+              />
             </div>
             <div className="form-group">
               <label>Phone Number *</label>
-              <input type="tel" className="form-input" placeholder="e.g. +91 98765 43210" required />
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="e.g. +91 98765 43210"
+                value={enquireForm.phone}
+                onChange={(e) => setEnquireForm({ ...enquireForm, phone: e.target.value })}
+                required
+              />
             </div>
             <div className="form-group">
               <label>Course Choice *</label>
-              <select className="form-input" required>
-                <option value="" disabled selected>-- Select Course --</option>
-                <option value="Ethical Hacking & VAPT">Ethical Hacking & VAPT</option>
-                <option value="AI & Machine Learning With Generative AI">AI & Machine Learning With Generative AI</option>
-                <option value="AWS, Azure & Google Cloud Architecture">AWS, Azure & Google Cloud Architecture</option>
-                <option value="Data Analytics & Visualization">Data Analytics & Visualization</option>
-                <option value="MERN Stack Development">MERN Stack Development</option>
-                <option value="SOC Analyst & Network Defense">SOC Analyst & Network Defense</option>
+              <select
+                className="form-input"
+                value={enquireForm.interestedCourse}
+                onChange={(e) => setEnquireForm({ ...enquireForm, interestedCourse: e.target.value })}
+                required
+              >
+                <option value="" disabled>-- Select Course --</option>
+                <option value="Ethical Hacking & VAPT Professional Program">Ethical Hacking & VAPT</option>
+                <option value="Artificial Intelligence & ML with Generative AI">AI & Machine Learning With Generative AI</option>
+                <option value="AWS, Azure & Google Cloud Masterclass">AWS, Azure & Google Cloud Architecture</option>
+                <option value="Data Analytics & Visualization Masterclass">Data Analytics & Visualization</option>
+                <option value="Full Stack MERN & Next.js Development">MERN Stack Development</option>
+                <option value="SOC Analyst & Incident Response Specialist">SOC Analyst & Network Defense</option>
               </select>
             </div>
-            <button type="submit" className="btn btn-cyan btn-block">SUBMIT ENQUIRY</button>
+            <button type="submit" className="btn btn-cyan btn-block" disabled={enquireSubmitting}>
+              {enquireSubmitting ? 'SUBMITTING...' : 'SUBMIT ENQUIRY'}
+            </button>
           </form>
         </div>
       </div>
 
-      {/* 6. DEMO MODAL FALLBACK */}
+      {/* 6. DEMO MODAL */}
       <div className={`modal-backdrop ${activeModal === 'demo' ? 'active' : ''}`} id="demoModal">
         <div className="modal-card">
           <button className="modal-close" onClick={() => closeModal('demo')}>&times;</button>
@@ -250,16 +500,49 @@ export default function Modals() {
             <h4 style={{ color: 'var(--white)', marginBottom: '6px' }}>🔴 Next Session: Penetration Testing Live Hack</h4>
             <p style={{ color: 'var(--cyan-primary)', fontSize: '0.85rem', fontWeight: 600 }}>Saturday at 6:00 PM | Duration: 2 Hours</p>
           </div>
-          <form onSubmit={(e) => handleFormSubmit(e, 'Workshop Registration')}>
+
+          {demoError && (
+            <div style={{ background: 'rgba(255, 50, 50, 0.1)', color: '#ff4757', padding: '10px 14px', borderRadius: '6px', fontSize: '0.88rem', marginBottom: '15px', border: '1px solid rgba(255,50,50,0.3)' }}>
+              <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i> {demoError}
+            </div>
+          )}
+
+          <form onSubmit={handleDemoSubmit}>
             <div className="form-group">
               <label>Full Name *</label>
-              <input type="text" className="form-input" placeholder="e.g. Rahul Sharma" required />
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. Rahul Sharma"
+                value={demoForm.fullName}
+                onChange={(e) => setDemoForm({ ...demoForm, fullName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Email Address (Optional)</label>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="e.g. rahul@example.com"
+                value={demoForm.email}
+                onChange={(e) => setDemoForm({ ...demoForm, email: e.target.value })}
+              />
             </div>
             <div className="form-group">
               <label>WhatsApp Number *</label>
-              <input type="tel" className="form-input" placeholder="e.g. +91 98765 43210" required />
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="e.g. +91 98765 43210"
+                value={demoForm.phone}
+                onChange={(e) => setDemoForm({ ...demoForm, phone: e.target.value })}
+                required
+              />
             </div>
-            <button type="submit" className="btn btn-cyan btn-block">REGISTER & RESERVED SEAT</button>
+            <button type="submit" className="btn btn-cyan btn-block" disabled={demoSubmitting}>
+              {demoSubmitting ? 'REGISTERING...' : 'REGISTER & RESERVED SEAT'}
+            </button>
           </form>
         </div>
       </div>

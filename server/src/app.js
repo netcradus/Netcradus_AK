@@ -44,6 +44,11 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Import API Routers
+const courseRoutes = require('./routes/courseRoutes');
+const enrollmentRoutes = require('./routes/enrollmentRoutes');
+const inquiryRoutes = require('./routes/inquiryRoutes');
+
 // 7. Base server health verification endpoint
 app.get('/api/v1/health', (req, res) => {
   res.status(200).json({
@@ -52,6 +57,11 @@ app.get('/api/v1/health', (req, res) => {
     timestamp: new Date()
   });
 });
+
+// 8. Mount Academy API Routers
+app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/enrollments', enrollmentRoutes);
+app.use('/api/v1/inquiries', inquiryRoutes);
 
 // 8. Capture and forward unhandled endpoint requests
 app.all('*', (req, res, next) => {

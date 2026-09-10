@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Certificate from './pages/Certificate';
 import Projects from './pages/Projects';
 import Contact from './pages/Contact';
+import { academyService } from './services/academyService';
 
 const AppContext = createContext();
 
@@ -19,6 +20,29 @@ export default function App() {
   const [enrollCourseName, setEnrollCourseName] = useState('');
   const [selectedCourseKey, setSelectedCourseKey] = useState('cyber');
   const [toast, setToast] = useState({ show: false, message: '' });
+
+  // Dynamic API Courses state
+  const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [coursesError, setCoursesError] = useState(null);
+
+  const loadCourses = async () => {
+    setLoadingCourses(true);
+    setCoursesError(null);
+    try {
+      const data = await academyService.getCourses('all');
+      setCourses(data);
+    } catch (err) {
+      console.error('[App] Failed to fetch courses catalog from API:', err);
+      setCoursesError(err.message || 'Unable to load courses right now. Please try again.');
+    } finally {
+      setLoadingCourses(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCourses();
+  }, []);
 
   const openModal = (modalType) => {
     setActiveModal(modalType);
@@ -84,7 +108,11 @@ export default function App() {
       openCourseDetails,
       toast,
       showToast,
-      handleFormSubmit
+      handleFormSubmit,
+      courses,
+      loadingCourses,
+      coursesError,
+      reloadCourses: loadCourses,
     }}>
       <BrowserRouter>
         <Routes>

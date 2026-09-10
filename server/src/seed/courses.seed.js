@@ -11,6 +11,17 @@ const coursesSeedData = [
     discountPrice: 2999900, // ₹29,999 represented in paise
     currency: "INR",
     duration: "6 Months (240 Hours Live Practical)",
+    bannerClass: "cyber-bg",
+    bannerIcon: "fa-solid fa-user-secret",
+    prereq: "Basic Networking and OS concepts",
+    cert: "Netcradus Certified Ethical Hacker (NCEH) + CEH v12 Prep",
+    highlights: [
+      "Vulnerability Assessment & Penetration Testing",
+      "Network & Web Application Security",
+      "Bug Bounty & SIEM/SOC Tools"
+    ],
+    tools: ["Metasploit", "Wireshark", "Burp Suite Pro", "Nmap", "Kali Linux", "OWASP ZAP"],
+    roles: ["Penetration Tester", "Cyber Security Analyst", "VAPT Engineer", "Security Consultant"],
     requirements: [
       "Basic Networking and OS concepts"
     ],
@@ -23,8 +34,7 @@ const coursesSeedData = [
       "Module 6: Cloud Pentesting & Report Writing for Corporate Audits"
     ],
     skills: [
-      "Metasploit", "Wireshark", "Burp Suite Pro", "Nmap", "Kali Linux", "OWASP ZAP",
-      "Penetration Tester", "Cyber Security Analyst", "VAPT Engineer", "Security Consultant"
+      "Metasploit", "Wireshark", "Burp Suite Pro", "Nmap", "Kali Linux", "OWASP ZAP"
     ],
     tags: ["Cyber Security", "VAPT", "Ethical Hacking", "SOC"],
     published: true,
@@ -42,6 +52,17 @@ const coursesSeedData = [
     discountPrice: 3499900, // ₹34,999 in paise
     currency: "INR",
     duration: "6 Months (240 Hours Live Coding)",
+    bannerClass: "ai-bg",
+    bannerIcon: "fa-solid fa-brain",
+    prereq: "Python fundamentals & Basic Mathematics",
+    cert: "Netcradus Certified AI & LLM Engineer",
+    highlights: [
+      "Deep Learning & Computer Vision",
+      "Generative AI, RAG & LangChain",
+      "Model Deployment & MLOps"
+    ],
+    tools: ["PyTorch", "TensorFlow", "OpenCV", "LangChain", "HuggingFace", "Docker"],
+    roles: ["AI Engineer", "Machine Learning Specialist", "GenAI Developer", "Data Scientist"],
     requirements: [
       "Python fundamentals & Basic Mathematics"
     ],
@@ -54,8 +75,7 @@ const coursesSeedData = [
       "Module 6: Deploying AI Models to AWS SageMaker & FastAPIs"
     ],
     skills: [
-      "PyTorch", "TensorFlow", "OpenCV", "LangChain", "HuggingFace", "Docker",
-      "AI Engineer", "Machine Learning Specialist", "GenAI Developer", "Data Scientist"
+      "PyTorch", "TensorFlow", "OpenCV", "LangChain", "HuggingFace", "Docker"
     ],
     tags: ["Artificial Intelligence", "Machine Learning", "Generative AI", "Deep Learning"],
     published: true,
@@ -73,6 +93,17 @@ const coursesSeedData = [
     discountPrice: 2499900, // ₹24,999 in paise
     currency: "INR",
     duration: "5 Months (200 Hours Multi-Cloud)",
+    bannerClass: "cloud-bg",
+    bannerIcon: "fa-solid fa-cloud-arrow-up",
+    prereq: "Basic Linux administration",
+    cert: "AWS Certified Solutions Architect & Azure Admin Prep",
+    highlights: [
+      "AWS Solutions Architect Prep",
+      "Azure Cloud Administration & GCP",
+      "Terraform Infrastructure as Code"
+    ],
+    tools: ["AWS Console", "Azure Portal", "Terraform", "Kubernetes", "Docker", "Ansible"],
+    roles: ["Cloud Solutions Architect", "Cloud Security Engineer", "DevOps Cloud Engineer"],
     requirements: [
       "Basic Linux administration"
     ],
@@ -85,8 +116,7 @@ const coursesSeedData = [
       "Module 6: Disaster Recovery, High Availability & Enterprise Migration"
     ],
     skills: [
-      "AWS Console", "Azure Portal", "Terraform", "Kubernetes", "Docker", "Ansible",
-      "Cloud Solutions Architect", "Cloud Security Engineer", "DevOps Cloud Engineer"
+      "AWS Console", "Azure Portal", "Terraform", "Kubernetes", "Docker", "Ansible"
     ],
     tags: ["Cloud Computing", "AWS", "Azure", "GCP", "DevOps", "Terraform"],
     published: true,
@@ -104,6 +134,17 @@ const coursesSeedData = [
     discountPrice: 1999900, // ₹19,999 in paise
     currency: "INR",
     duration: "4 Months (160 Hours Practical)",
+    bannerClass: "data-bg",
+    bannerIcon: "fa-solid fa-chart-line",
+    prereq: "None required",
+    cert: "Netcradus Certified Data Analyst",
+    highlights: [
+      "Advanced SQL, Python Data Science",
+      "PowerBI & Tableau Dashboards",
+      "Business Intelligence & Analytics"
+    ],
+    tools: ["Python", "Advanced SQL", "PowerBI", "Tableau", "Excel VBA", "Jupyter"],
+    roles: ["Data Analyst", "Business Intelligence Engineer", "PowerBI Developer"],
     requirements: [
       "None required"
     ],
@@ -116,8 +157,7 @@ const coursesSeedData = [
       "Module 6: Capstone Project with Real Enterprise Financial Data"
     ],
     skills: [
-      "Python", "Advanced SQL", "PowerBI", "Tableau", "Excel VBA", "Jupyter",
-      "Data Analyst", "Business Intelligence Engineer", "PowerBI Developer"
+      "Python", "Advanced SQL", "PowerBI", "Tableau", "Excel VBA", "Jupyter"
     ],
     tags: ["Data Analytics", "SQL", "Python", "PowerBI", "Business Intelligence"],
     published: true,
@@ -135,6 +175,17 @@ const coursesSeedData = [
     discountPrice: 2999900, // ₹29,999 in paise
     currency: "INR",
     duration: "6 Months (240 Hours Web Labs)",
+    bannerClass: "fullstack-bg",
+    bannerIcon: "fa-solid fa-layer-group",
+    prereq: "Basic HTML & CSS knowledge",
+    cert: "Netcradus Certified Full Stack Developer",
+    highlights: [
+      "MongoDB, Express, React, Node.js",
+      "Next.js 14, TypeScript & Tailwind",
+      "CI/CD Pipeline & Web Deployment"
+    ],
+    tools: ["React 18", "Next.js 14", "Node.js", "Express", "MongoDB", "Tailwind CSS"],
+    roles: ["MERN Stack Developer", "Frontend Engineer", "Node.js Backend Developer"],
     requirements: [
       "Basic HTML & CSS knowledge"
     ],
@@ -147,8 +198,7 @@ const coursesSeedData = [
       "Module 6: Full Stack Next.js App Deployment on Vercel & AWS S3"
     ],
     skills: [
-      "React 18", "Next.js 14", "Node.js", "Express", "MongoDB", "Tailwind CSS",
-      "MERN Stack Developer", "Frontend Engineer", "Node.js Backend Developer"
+      "React 18", "Next.js 14", "Node.js", "Express", "MongoDB", "Tailwind CSS"
     ],
     tags: ["Full Stack", "MERN Stack", "Next.js", "React", "Node.js"],
     published: true,
@@ -166,6 +216,17 @@ const coursesSeedData = [
     discountPrice: 2699900, // ₹26,999 in paise
     currency: "INR",
     duration: "5 Months (200 Hours SOC Lab)",
+    bannerClass: "devops-bg",
+    bannerIcon: "fa-solid fa-shield-virus",
+    prereq: "Networking & Security Basics",
+    cert: "Netcradus Certified SOC Security Analyst",
+    highlights: [
+      "Splunk Enterprise SIEM Operations",
+      "Malware Analysis & Incident Response",
+      "Threat Hunting & Forensic Analysis"
+    ],
+    tools: ["Splunk Enterprise", "Wireshark", "QRadar", "Elastic SIEM", "YARA", "Autopsy"],
+    roles: ["L1/L2 SOC Analyst", "Incident Responder", "Threat Hunter"],
     requirements: [
       "Networking & Security Basics"
     ],
@@ -178,8 +239,7 @@ const coursesSeedData = [
       "Module 6: Simulated Live Ransomware Attack Defense"
     ],
     skills: [
-      "Splunk Enterprise", "Wireshark", "QRadar", "Elastic SIEM", "YARA", "Autopsy",
-      "L1/L2 SOC Analyst", "Incident Responder", "Threat Hunter"
+      "Splunk Enterprise", "Wireshark", "QRadar", "Elastic SIEM", "YARA", "Autopsy"
     ],
     tags: ["Cyber Security", "SOC", "Incident Response", "Splunk", "Threat Intelligence"],
     published: true,

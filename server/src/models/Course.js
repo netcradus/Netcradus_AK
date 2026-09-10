@@ -89,6 +89,34 @@ const courseSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    bannerClass: {
+      type: String,
+      default: 'cyber-bg',
+    },
+    bannerIcon: {
+      type: String,
+      default: 'fa-solid fa-graduation-cap',
+    },
+    highlights: {
+      type: [String],
+      default: [],
+    },
+    tools: {
+      type: [String],
+      default: [],
+    },
+    cert: {
+      type: String,
+      default: '',
+    },
+    roles: {
+      type: [String],
+      default: [],
+    },
+    prereq: {
+      type: String,
+      default: '',
+    },
     published: {
       type: Boolean,
       default: true,
