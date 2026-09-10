@@ -5,8 +5,7 @@ const createInquirySchema = Joi.object({
     'string.empty': 'Full name is required',
     'string.min': 'Full name must be at least 2 characters',
   }),
-  email: Joi.string().trim().email().required().messages({
-    'string.empty': 'Email address is required',
+  email: Joi.string().trim().email().allow('', null).optional().messages({
     'string.email': 'Please provide a valid email address',
   }),
   phone: Joi.string().trim().min(7).max(20).required().messages({
@@ -26,6 +25,11 @@ const createInquirySchema = Joi.object({
       'workshop_registration'
     )
     .default('quick_enquiry'),
+}).custom((value, helpers) => {
+  if (['contact_page', 'quick_enquiry'].includes(value.source) && (!value.email || !value.email.trim())) {
+    return helpers.message('Email address is required for contact and quick enquiry forms');
+  }
+  return value;
 });
 
 module.exports = {

@@ -4,6 +4,7 @@ const Course = require('../models/Course');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const { createEnrollmentSchema } = require('../validators/enrollmentValidator');
+const escapeRegex = require('../utils/escapeRegex');
 
 /**
  * @desc    Submit an Academy course enrollment application
@@ -23,7 +24,7 @@ const createEnrollment = asyncHandler(async (req, res, next) => {
 
   const { fullName, email, phone, courseId, courseSlug, courseName } = value;
 
-  // 2. Resolve target Course document
+  // 2. Resolve target Course document (Priority: ID -> Slug -> Title match)
   let targetCourse = null;
 
   if (courseId && mongoose.Types.ObjectId.isValid(courseId)) {
@@ -31,15 +32,26 @@ const createEnrollment = asyncHandler(async (req, res, next) => {
   }
 
   if (!targetCourse && (courseSlug || courseName)) {
-    const searchTerm = (courseSlug || courseName).trim();
-    targetCourse = await Course.findOne({
-      $or: [
-        { slug: searchTerm.toLowerCase() },
-        { title: { $regex: new RegExp(`^${searchTerm}$`, 'i') } },
-        { shortDescription: { $regex: new RegExp(`^${searchTerm}$`, 'i') } },
-      ],
-      published: true,
-    });
+    const searchSlug = (courseSlug || '').trim().toLowerCase();
+    const searchName = (courseName || '').trim();
+
+    // Direct slug match
+    if (searchSlug) {
+      targetCourse = await Course.findOne({ slug: searchSlug, published: true });
+    }
+
+    // Safe regex title / shortDescription match
+    if (!targetCourse && searchName) {
+      const safeName = escapeRegex(searchName);
+      targetCourse = await Course.findOne({
+        $or: [
+          { title: { $regex: new RegExp(`^${safeName}$`, 'i') } },
+          { title: { $regex: new RegExp(safeName, 'i') } },
+          { shortDescription: { $regex: new RegExp(safeName, 'i') } },
+        ],
+        published: true,
+      });
+    }
   }
 
   if (!targetCourse) {

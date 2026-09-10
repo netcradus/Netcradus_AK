@@ -1,5 +1,6 @@
 const Course = require('../models/Course');
 const asyncHandler = require('../utils/asyncHandler');
+const escapeRegex = require('../utils/escapeRegex');
 
 // Category slug/key mapping to DB category values
 const categoryMap = {
@@ -11,31 +12,35 @@ const categoryMap = {
 };
 
 /**
- * @desc    Get all active/published Academy courses (supports optional category filter)
+ * @desc    Get all active/published Academy courses (supports optional category filter & safe search)
  * @route   GET /api/v1/courses
  * @access  Public
  */
 const getCourses = asyncHandler(async (req, res, next) => {
   const query = { published: true };
 
-  // Parse category filter
+  // Parse category filter safely
   if (req.query.category && req.query.category.toLowerCase() !== 'all') {
     const rawCategory = req.query.category.toLowerCase().trim();
     const mappedCategory = categoryMap[rawCategory] || req.query.category.trim();
+    const safeCategory = escapeRegex(mappedCategory);
 
     // Perform case-insensitive match for flexibility
-    query.category = { $regex: new RegExp(`^${mappedCategory}$`, 'i') };
+    query.category = { $regex: new RegExp(`^${safeCategory}$`, 'i') };
   }
 
-  // Parse optional search query
+  // Parse optional search query safely (escaping regex special characters)
   if (req.query.search) {
-    const searchRegex = new RegExp(req.query.search.trim(), 'i');
-    query.$or = [
-      { title: searchRegex },
-      { shortDescription: searchRegex },
-      { category: searchRegex },
-      { tags: searchRegex },
-    ];
+    const safeSearch = escapeRegex(req.query.search.trim());
+    if (safeSearch.length > 0) {
+      const searchRegex = new RegExp(safeSearch, 'i');
+      query.$or = [
+        { title: searchRegex },
+        { shortDescription: searchRegex },
+        { category: searchRegex },
+        { tags: searchRegex },
+      ];
+    }
   }
 
   const courses = await Course.find(query).sort({ createdAt: -1 });
@@ -54,9 +59,10 @@ const getCourses = asyncHandler(async (req, res, next) => {
  */
 const getCourseBySlug = asyncHandler(async (req, res, next) => {
   const { slug } = req.params;
+  const safeSlug = (slug || '').toLowerCase().trim();
 
   const course = await Course.findOne({
-    slug: slug.toLowerCase().trim(),
+    slug: safeSlug,
     published: true,
   });
 

@@ -61,12 +61,21 @@ export default function Modals() {
     setEnrollError('');
 
     try {
+      // Find target course from API courses list to resolve courseId and canonical slug
+      const matchedCourse = (courses || []).find(
+        (c) =>
+          c.title === enrollCourseName ||
+          c.slug === selectedCourseKey ||
+          c.shortDescription === enrollCourseName
+      );
+
       const payload = {
         fullName: enrollForm.fullName,
         email: enrollForm.email,
         phone: enrollForm.phone,
         courseName: enrollCourseName,
-        courseSlug: selectedCourseKey,
+        courseSlug: matchedCourse ? matchedCourse.slug : selectedCourseKey,
+        ...(matchedCourse && matchedCourse._id ? { courseId: matchedCourse._id } : {}),
       };
 
       const result = await academyService.submitEnrollment(payload);
@@ -117,7 +126,7 @@ export default function Modals() {
     try {
       const payload = {
         fullName: callForm.fullName,
-        email: callForm.email || `${callForm.fullName.replace(/\s+/g, '').toLowerCase()}@callback.netcradus.com`,
+        email: callForm.email ? callForm.email.trim() : '',
         phone: callForm.phone,
         interestedCourse: 'Callback Request',
         source: 'callback_request',
@@ -144,7 +153,7 @@ export default function Modals() {
     try {
       const payload = {
         fullName: demoForm.fullName,
-        email: demoForm.email || `${demoForm.fullName.replace(/\s+/g, '').toLowerCase()}@demo.netcradus.com`,
+        email: demoForm.email ? demoForm.email.trim() : '',
         phone: demoForm.phone,
         interestedCourse: 'Live Cybersecurity Workshop Demo',
         source: 'workshop_registration',
