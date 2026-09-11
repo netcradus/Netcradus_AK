@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 /**
  * Reusable function to initialize Mongoose connection to MongoDB.
- * Ensures credentials are redacted in logs.
  * Exits process with 1 if connection fails.
  */
 const connectDB = async () => {
@@ -12,28 +11,12 @@ const connectDB = async () => {
     process.exit(1);
   }
 
-  // Parse and redact credentials from URI for safe logging
-  let safeUri = uri;
   try {
-    if (uri.startsWith('mongodb+srv://') || uri.startsWith('mongodb://')) {
-      const urlParts = uri.split('@');
-      if (urlParts.length > 1) {
-        const protocolPart = urlParts[0].split('://');
-        const protocol = protocolPart[0];
-        safeUri = `${protocol}://****:****@${urlParts[1]}`;
-      }
-    }
-  } catch (err) {
-    safeUri = 'mongodb://****:****@hidden-host';
-  }
-
-  try {
-    console.log(`[Database] Attempting connection to: ${safeUri}`);
     const conn = await mongoose.connect(uri);
-    console.log(`[Database] MongoDB Connected Successfully: ${conn.connection.host} / ${conn.connection.name}`);
+    console.log('[Database] MongoDB connected successfully');
     return conn;
   } catch (error) {
-    console.error(`[Database Error] Connection failed to ${safeUri}: ${error.message}`);
+    console.error(`[Database] MongoDB connection failed: ${error.message}`);
     process.exit(1);
   }
 };

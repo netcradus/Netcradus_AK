@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const rateLimit = require('express-rate-limit');
 const errorHandler = require('./middleware/errorHandler');
@@ -29,6 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 // 4. Body parser and size limits to prevent DOS
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
 
 // 5. Data sanitization to protect against MongoDB Query Injections
 app.use(mongoSanitize());
@@ -45,6 +47,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Import API Routers
+const authRoutes = require('./routes/authRoutes');
 const courseRoutes = require('./routes/courseRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
 const inquiryRoutes = require('./routes/inquiryRoutes');
@@ -59,6 +62,7 @@ app.get('/api/v1/health', (req, res) => {
 });
 
 // 8. Mount Academy API Routers
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/enrollments', enrollmentRoutes);
 app.use('/api/v1/inquiries', inquiryRoutes);

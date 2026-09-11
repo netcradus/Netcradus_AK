@@ -6,9 +6,8 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer-container">
         <div className="footer-col brand-col">
-          <Link to="/" className="logo brand-logo-link">
-            <img src="/images/logo.png" alt="NETCRADUS™" className="site-logo-img" />
-            <span className="logo-sub-tag">ACADEMIA</span>
+          <Link to="/" className="logo brand-logo-link" title="Netcradus Academy">
+            <img src="/images/logo.png" alt="NETCRADUS ACADEMY™" className="site-logo-img" />
           </Link>
           <p className="footer-desc">
             Netcradus Academia is India's premier cybersecurity and artificial intelligence skill development platform.
